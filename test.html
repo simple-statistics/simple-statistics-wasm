@@ -1,0 +1,10 @@
+<script>
+fetch('wasm/sum.wasm').then(response =>
+  response.arrayBuffer()
+).then(bytes =>
+  WebAssembly.instantiate(bytes)
+).then(results => {
+  console.log(results.instance.exports.f(1));
+  window.f = results.instance.exports.f;
+});
+</script>
