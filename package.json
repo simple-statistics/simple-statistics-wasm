@@ -1,0 +1,22 @@
+{
+  "name": "simple-statistics-wasm",
+  "version": "1.0.0",
+  "description": "a subset of simple-statistics, implemented in web assembly",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node --expose-wasm test/test.js"
+  },
+  "keywords": [
+    "simple",
+    "statistics",
+    "wasm"
+  ],
+  "author": "Tom MacWright",
+  "license": "ISC",
+  "devDependencies": {
+    "tap": "^10.3.2"
+  }
+}

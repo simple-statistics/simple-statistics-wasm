@@ -1,0 +1,90 @@
+(module
+
+;; based on https://github.com/dspinellis/unix-history-repo/blob/Bell-32V-Snapshot-Development/usr/src/libm/exp.c
+  (func $exp
+  (param f64)
+  (result f64)
+
+  (local $ent f64)
+  (local $fract f64)
+  (local $temp1 f64)
+  (local $temp2 f64)
+  (local $xsq f64)
+  (local $p0 f64)
+  (local $p1 f64)
+  (local $p2 f64)
+  (local $q0 f64)
+  (local $q1 f64)
+  (local $q2 f64)
+  (local $log2e f64)
+  (local $sqrt2 f64)
+  (local $maxf f64)
+
+  ($p0 = 2080384.346694663)
+  ($p1 = 30286.971697440364)
+  ($p2 = 60.61485330061081)
+  ($q0 = 6002720.360238832)
+  ($q1 = 327725.15180829144)
+  ($q2 = 1749.2876890930763)
+  ($log2e = 1.4426950408889634073599247)
+  ($sqrt2 = 1.4142135623730950488016887)
+  ($maxf = 10000)
+
+  (if f64 (%0 == 0)
+    (then 1)
+  (else (if f64 (%0 < (-1 * %$maxf))
+    (then 0)
+  (else (if f64 (%0 > %$maxf)
+    (then (f64.const -1)) ;; TODO: throw error
+  (else
+    (0 = (%0 * %$log2e))
+    ($ent = (f64.trunc %0))
+    ($fract = ((%0 - %$ent) - 0.5))
+    ($xsq = (%$fract * %$fract))
+    ($temp1 = (%$fract * (%$p0 + (%$xsq * (%$p1 + (%$xsq * %$p2))))))
+    ($temp2 = (%$q0 + (%$xsq * (%$q1 + (%$xsq * (%$q2 + (%$xsq * 0)))))))
+    (return ((%$sqrt2 * ((%$temp1 + %$temp2) / (%$temp2 - %$temp1)))
+      * (f64.convert_s/i32
+          ((i32.const 2) i32.shl (i32.trunc_s/f64 (%$ent - 1)))))))))))))
+
+  (func (export "errorFunction")
+    (param f64)
+    (result f64)
+    (local $t f64)
+    (local $accum f64)
+    (local $tau f64) ;; t = 1 / (1 + 0.5 * abs(x))
+    ($t = (1 / (1 + (0.5 * (f64.abs %0)))))
+    ($accum = %$t)
+    ;; -Math.pow(x, 2) - 1.265...
+    ($tau = ((-1 * (%0 * %0)) - 1.26551223))
+    ;; + 1.00002368 * t
+    ($tau = (%$tau + (%$t * 1.00002368)))
+    ;; accum = Math.pow(t, 2);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau + (%$accum * 0.37409196)))
+    ;; accum = Math.pow(t, 3);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau + (%$accum * 0.09678418)))
+    ;; accum = Math.pow(t, 4);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau - (%$accum * 0.18628806)))
+    ;; accum = Math.pow(t, 5);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau + (%$accum * 0.27886807)))
+    ;; accum = Math.pow(t, 6);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau - (%$accum * 1.13520398)))
+    ;; accum = Math.pow(t, 7);
+    ($accum = (%$t * %$accum))
+    ($tau = (%$tau + (%$accum * 1.48851587)))
+    ;; accum = Math.pow(t, 8);
+    ($accum  = (%$t * %$accum))
+    ($tau = (%$tau - (%$accum * 0.82215223)))
+    ;; accum = Math.pow(t, 9);
+    ($accum  = (%$t * %$accum))
+    ($tau = (%$tau + (%$accum * 0.17087277)))
+    ($tau = (call $exp %$tau))
+
+    (if f64 (%0 >= 0)
+      (then (1 - %$tau))
+      (else (%$tau - 1)))))
