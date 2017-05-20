@@ -25,16 +25,18 @@
   (set_local $q2 (f64.const 1749.2876890930763))
   (set_local $log2e (f64.const 1.4426950408889634))
   (set_local $sqrt2 (f64.const 1.4142135623730951))
-  (set_local $maxf (f64.const 10000))
+  (set_local $maxf (f64.const 10000.0))
   (if
    f64
-   (f64.eq (get_local 0) (f64.const 0))
-   (then (f64.const 1))
+   (f64.eq (get_local 0) (f64.const 0.0))
+   (then (f64.const 1.0))
    (else
     (if
      f64
-     (f64.lt (get_local 0) (f64.mul (f64.const -1) (get_local $maxf)))
-     (then (f64.const 0))
+     (f64.lt
+      (get_local 0)
+      (f64.mul (f64.const -1.0) (get_local $maxf)))
+     (then (f64.const 0.0))
      (else
       (if
        f64
@@ -74,7 +76,7 @@
              (get_local $xsq)
              (f64.add
               (get_local $q2)
-              (f64.mul (get_local $xsq) (f64.const 0))))))))
+              (f64.mul (get_local $xsq) (f64.const 0.0))))))))
         (return
          (f64.mul
           (f64.mul
@@ -86,7 +88,7 @@
            (i32.shl
             (i32.const 2)
             (i32.trunc_s/f64
-             (f64.sub (get_local $ent) (f64.const 1))))))))))))))
+             (f64.sub (get_local $ent) (f64.const 1.0))))))))))))))
  (func
   (export "errorFunction")
   (param f64)
@@ -97,15 +99,15 @@
   (set_local
    $t
    (f64.div
-    (f64.const 1)
+    (f64.const 1.0)
     (f64.add
-     (f64.const 1)
+     (f64.const 1.0)
      (f64.mul (f64.const 0.5) (f64.abs (get_local 0))))))
   (set_local $accum (get_local $t))
   (set_local
    $tau
    (f64.sub
-    (f64.mul (f64.const -1) (f64.mul (get_local 0) (get_local 0)))
+    (f64.mul (f64.const -1.0) (f64.mul (get_local 0) (get_local 0)))
     (f64.const 1.26551223)))
   (set_local
    $tau
@@ -163,6 +165,6 @@
   (set_local $tau (call $exp (get_local $tau)))
   (if
    f64
-   (f64.ge (get_local 0) (f64.const 0))
-   (then (f64.sub (f64.const 1) (get_local $tau)))
-   (else (f64.sub (get_local $tau) (f64.const 1))))))
+   (f64.ge (get_local 0) (f64.const 0.0))
+   (then (f64.sub (f64.const 1.0) (get_local $tau)))
+   (else (f64.sub (get_local $tau) (f64.const 1.0))))))

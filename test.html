@@ -1,10 +1,16 @@
+<script src='https://unpkg.com/simple-statistics@4.1.0/dist/simple-statistics.min.js'></script>
 <script>
-fetch('wasm/sum.wasm').then(response =>
+
+fetch('./build/error_function.wasm').then(response =>
   response.arrayBuffer()
 ).then(bytes =>
   WebAssembly.instantiate(bytes)
 ).then(results => {
-  console.log(results.instance.exports.f(1));
-  window.f = results.instance.exports.f;
+  for (var i = -1; i <= 1; i += 0.01) {
+    console.log('ss-wasm',
+      results.instance.exports.errorFunction(i),
+      'ss',
+      ss.errorFunction(i));
+  }
 });
 </script>
