@@ -1,16 +1,76 @@
 <script src='https://unpkg.com/simple-statistics@4.1.0/dist/simple-statistics.min.js'></script>
 <script>
+function errorFunction(x/*: number */)/*: number */ {
+    var t = 1 / (1 + 0.5 * Math.abs(x));
+    var tau = t * Math.exp(-Math.pow(x, 2) -
+        1.26551223 +
+        1.00002368 * t +
+        0.37409196 * Math.pow(t, 2) +
+        0.09678418 * Math.pow(t, 3) -
+        0.18628806 * Math.pow(t, 4) +
+        0.27886807 * Math.pow(t, 5) -
+        1.13520398 * Math.pow(t, 6) +
+        1.48851587 * Math.pow(t, 7) -
+        0.82215223 * Math.pow(t, 8) +
+        0.17087277 * Math.pow(t, 9));
+    if (x >= 0) {
+        return 1 - tau;
+    } else {
+        return tau - 1;
+    }
+}
+
+var	p0	= .2080384346694663001443843411e7;
+var	p1	= .3028697169744036299076048876e5;
+var	p2	= .6061485330061080841615584556e2;
+var	q0	= .6002720360238832528230907598e7;
+var	q1	= .3277251518082914423057964422e6;
+var	q2	= .1749287689093076403844945335e4;
+var	log2e	= 1.4426950408889634073599247;
+var	sqrt2	= 1.4142135623730950488016887;
+var	maxf	= 10000;
+
+function exp(arg) {
+	if(arg == 0.)
+		return(1.);
+	if(arg < -maxf)
+		return(0.);
+	if(arg > maxf) {
+		errno = ERANGE;
+		return(HUGE);
+	}
+	arg *= log2e;
+	ent = Math.floor(arg);
+	fract = (arg-ent) - 0.5;
+	xsq = fract*fract;
+	temp1 = ((p2*xsq+p1)*xsq+p0)*fract;
+	temp2 = ((1.0*xsq+q2)*xsq+q1)*xsq + q0;
+	return (sqrt2*(temp2+temp1)/(temp2-temp1)) * Math.pow(2, ent);
+}
 
 fetch('./build/error_function.wasm').then(response =>
   response.arrayBuffer()
 ).then(bytes =>
   WebAssembly.instantiate(bytes)
 ).then(results => {
-  for (var i = -1; i <= 1; i += 0.01) {
-    console.log('ss-wasm',
-      results.instance.exports.errorFunction(i),
-      'ss',
-      ss.errorFunction(i));
+  for (var i = -1; i <= 1; i += 0.001) {
+    var wasmResult = results.instance.exports.errorFunction(i);
+    var result = errorFunction(i);
+    console.assert(wasmResult.toFixed(7) == result.toFixed(7), `wasm result ${wasmResult} != ${result}`);
   }
+
+  console.time('wasm errorFunction');
+  var accum = 0;
+  for (var i = -2; i <= 2; i += 0.001) {
+    accum += results.instance.exports.errorFunction(i);
+  }
+  console.timeEnd('wasm errorFunction');
+
+  console.time('errorFunction');
+  var accum = 0;
+  for (var i = -2; i <= 2; i += 0.001) {
+    accum += errorFunction(i);
+  }
+  console.timeEnd('errorFunction');
 });
 </script>
